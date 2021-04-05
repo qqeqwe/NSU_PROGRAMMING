@@ -5,7 +5,7 @@
 int main() {
 	int z = 0,p = 0,t = 0,k = 0,v = 0,x = 0,s = 0,d = 1,i = 0,j = 0;
 	int m;
-	char a[1023];
+	char a[q];
 	char b[6];
 	char str1[10]="PACK";
 	char str2[10]="UNPACK";
