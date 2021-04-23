@@ -26,35 +26,25 @@ for (i = 0; i < size; i++){
 
 void qSort(int *num, int l, int r)
 {
-  int nach; 
-  int l_grn = l; 
-  int r_grn = r; 
-  nach = num[l];
-  while (l < r) 
-  {
-    while ((num[r] >= nach) && (l < r))
-      r--; 
-    if (l != r) 
+    if (l < r)
     {
-      num[l] = num[r]; 
-      l++; 
+        int l_grn = l, r_grn = r, centr = num[(l_grn + r_grn) / 2];
+        do
+        {
+            while (num[l_grn] < centr) l_grn++;
+            while (num[r_grn] > centr) r_grn--;
+            if (l_grn <= r_grn)
+            {
+                int tmp = num[l_grn];
+                num[l_grn] = num[r_grn];
+                num[r_grn] = tmp;
+                l_grn++;
+                r_grn--;
+            }
+        } while (l_grn <= r_grn);
+        qSort(num, l, r_grn);
+        qSort(num, l_grn, r);
     }
-    while ((num[l] <= nach) && (l < r))
-      l++; 
-    if (l != r) 
-    {
-      num[r] = num[l]; 
-      r--; 
-    }
-  }
-  num[l] = nach; 
-  nach = l;
-  l = l_grn;
-  r = r_grn;
-  if (l < nach) 
-    qSort(num, l, nach - 1);
-  if (r > nach)
-    qSort(num, nach + 1, r);
 }
 void matbehsic(int b[k][k], int sihe, int str, int stlb, int newmat[k][k]) {
     int indstroki = 0; 
@@ -109,6 +99,7 @@ int w[c];
 int p[c];
 int a[k][k];
 int b[c][k][k];
+int heh[c][k][k];
 int rnk[k];
 
 while(l<c){
@@ -126,8 +117,9 @@ while(l<c){
 		printf("a[%d][%d]",i,j);
 		scanf("%d",&a[i][j]);
 		b[f][i][j]=a[i][j];
-		printf("!%d!  %d", b[f][i][j], f);
-		printf("+%d+", b[2][0][0]);
+		heh[f][i][j]=a[i][j];
+		//printf("!%d!  %d", b[f][i][j], f);
+		//printf("+%d+", b[2][0][0]);
 
 
 }	
@@ -138,8 +130,8 @@ q=opred(a,v);
 w[l]=q;
 z2[l]=q;
 
-//printf("w[%d]=%d\n",l,w[l]);
-//printf("blyat[%d]=%d\n",l,z2[l]);
+//printf("w[%d]=%d\n",l_grn,w[l_grn]);
+//printf("blyat[%d]=%d\n",l_grn,z2[l_grn]);
 
 
 l++; 
@@ -149,7 +141,7 @@ f++;
 }
 
 //}
-//for(m =0; m < l; m++){
+//for(m =0; m < l_grn; m++){
 //printf("w[%d]=%d\n",m,w[m]);
 //}
 
@@ -162,26 +154,40 @@ for (x = 1;x < c+1; x++){
 printf(" \n");
 qSort(w, 0, l-1);
 
-//for(m =0; m < l; m++){
+//for(m =0; m < l_grn; m++){
 //printf("h[%d]=%d\n",m,w[m]);
 //}
 
 
 indsort(w, z2, p, c);
-//for(m =0; m < l; m++){
+//for(m =0; m < l_grn; m++){
 	//printf("p[%d]-%d\n", m, p[m] );
 //}
 		//printf("+%d+", b[2][0][0]);
+//for(m = 0;  m < l; m++){
+//g=p[m];
+	//printf("g[%d]-%d\n", m, g );
+//	printf("\n" );
+//	for (i = 0; i < rnk[g];i++) {
+//		for(j = 0; j < rnk[g]; j++) {
+//			printf("%d", b[g][i][j]);
+//		}
+//	}
+//}
 for(m = 0;  m < l; m++){
 	g=p[m];
-	printf("g[%d]-%d\n", m, g );
+	//printf("g[%d]-%d\n", m, g );
+	printf("\n" );
 	for (i = 0; i < rnk[g];i++) {
 		for(j = 0; j < rnk[g]; j++) {
-			printf("%d", b[g][i][j]);
+			printf("%d", heh[g][i][j]);
 		}
+		printf("\n" );
 	}
+	
 }
 
 
 return 0;
 }
+
