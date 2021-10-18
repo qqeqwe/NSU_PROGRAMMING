@@ -6,26 +6,6 @@
 #include <limits>
 
 using namespace std;
-//int count(const char* s1,const char* s2) {
-//	const int S = 256;
-//	int k = 0;
-//	int cnt = 0;
-//	char a[S] = "";
-//	char b[S] = "";
-//	for (int i = 0; i < strlen(s1); i++) {
-//		char tmp[S] = "";
-//		k = 0;
-//		if (a[i] == b[0]) {
-//			int j = i;
-//			while (a[j] == b[k]) {
-//				tmp[k] = a[j];
-//				j++; k++;
-//			}
-//			if (!(strcmp(b, tmp)))cnt++;
-//		}
-//	}
-//	return cnt;
-//}
 
 int findd(char* s1, char* s2) {
 	int b = 0;
@@ -149,7 +129,6 @@ public:
 			for (int i = 0; i < leng; i++) {
 				b[i] = this->S[i];
 			}
-			//b[lengggggggggggggggggggggggggggg] = '\0';
 			b[leng] = s1;
 			this->S = new char[leng + 1];
 			this->S = b;
@@ -296,24 +275,6 @@ public:
 	}
 };
 
-//String del_rep(String rep, String del) { //меняем удаляем исходная
-//	String res(*this);
-//	int c = find(this->S, del.S);
-//	//int m = count(this->S, s.S);
-//	for (int i = 0; i < c; i++) {
-//		char* where = strstr(res.S, del.S);
-//		if (where)
-//		{
-//				memmove(where, where + strlen(del.S),
-//					strlen(where + strlen(del.S)) + 1);
-
-//			res.leng = strlen(res.S)+strlen(rep.S);
-//		}
-//	}
-
-//	return res;
-//}
-
 
 
 int main() {
@@ -349,19 +310,6 @@ int main() {
 		str1 = str4;
 	}
 	str4.print();
-	//int m;
-	/*str1.printts();
-	str2.prints();*/
-	//String str3()
-	//m = str2.lenght(str2);
-	//cout << m;
-	/*str1.print();
-	cout << '\n';
-	str2.print();
-	cout << "\n";
-	str3.print();*/
-	/*str1.find(str2, str3);
-	str1.print();*/
 
 
 	return 0;
