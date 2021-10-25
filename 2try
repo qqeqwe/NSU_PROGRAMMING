@@ -1,0 +1,366 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <type_traits>
+#include <limits>
+
+using namespace std;
+//int count(const char* s1,const char* s2) {
+//	const int S = 256;
+//	int k = 0;
+//	int cnt = 0;
+//	char a[S] = "";
+//	char b[S] = "";
+//	for (int i = 0; i < strlen(s1); i++) {
+//		char tmp[S] = "";
+//		k = 0;
+//		if (a[i] == b[0]) {
+//			int j = i;
+//			while (a[j] == b[k]) {
+//				tmp[k] = a[j];
+//				j++; k++;
+//			}
+//			if (!(strcmp(b, tmp)))cnt++;
+//		}
+//	}
+//	return cnt;
+//}
+
+int findd(char* s1, char* s2) {
+	int b = 0;
+	int n = strlen(s1);
+	int m = strlen(s2);
+	int d = 0;
+	int z = d;
+	int g = 0;
+	for (int i = 0; i < n; i++) {
+		if (s1[i] == s2[0]) {
+			g = 0;
+			for (int k = 0; k < m; k++) {
+				if (s1[i + k] == s2[k]) {
+					g++;
+					if (g == strlen(s2)) {
+						d++;
+					}
+					continue;
+				}
+				else {
+					g = 0;;
+					break;
+				}
+				//tmp[i + k] = tmp[i + k + 1];
+			}
+
+		}
+	}
+	return d;
+}
+
+
+
+class String {
+private:
+	char* S;
+	int leng;
+
+public:
+	void print() {
+		for (int i = 0; i < leng; i++)
+			cout << S[i];
+	}
+	String test() {
+		return this->leng;
+	}
+	String(const String& s1)
+	{
+		if (leng != s1.leng)
+		{
+			leng = s1.leng;
+			 S = nullptr;//нужен delete я думаю 
+			S = new char[leng + 1];
+		}
+		strcpy(S, s1.S);
+	}
+	/*~String() {
+		delete[] S;
+	}*///(так же ломается на деструкторе )
+
+	String() : S(nullptr), leng(0) { }
+	String(char b) {
+		S = new char[1];
+		S[0] = b;
+		leng = 1;
+	}
+	String(const char* s) {
+		leng = strlen(s);
+		this->S = new char[leng + 1];
+		for (int i = 0; i < leng; i++) {
+			this->S[i] = s[i];
+		}
+		this->S[leng] = '\0';//means end of the line
+	}
+	String operator + (String s1) {
+		String res;
+		res.S = new char[leng + s1.leng];
+		res.leng = leng + s1.leng;
+		res.S[res.leng - 1] = '\0';
+		int j = 0;
+		for (int i = 0; i < leng; i++) {
+			res.S[i] = this->S[i];
+			j++;
+		}
+		for (int i = 0; i < s1.leng; i++) {
+			res.S[j + i] = s1.S[i];
+		}
+
+		/*strcpy(res.S, S);
+		strcat(res.S, s1.S);*/
+		return res;
+
+	}
+	String operator + (char s1) {
+		return *this + String(s1);
+
+	}
+	String operator += (String s1) {
+		strcpy(this->S, S);
+		strcat(this->S, s1.S);
+		leng = leng + s1.leng;
+		return *this;
+	}
+	String operator += (char s1) {	
+		if (this->S == nullptr) {
+			*this = String(s1);
+			return *this;
+		}
+		else {
+			char* b = new char[leng + 1];
+			for (int i = 0; i < leng; i++) {
+				b[i] = this->S[i];
+			}
+			b[leng] = s1;
+			this->S = new char[leng + 1];
+			this->S = b;
+			leng = leng + 1;
+			this->S[leng] = '\0';
+			return *this;
+		}
+	}
+	String operator()(int x, int y) {
+
+		String res;
+		if (y - x < 0 || y - x > leng) {
+			cout << "owibla operatora ()";
+			exit(1);
+		}
+		else if (y == x) {
+			res.S = new char[1];
+			res.S[0] = S[x];
+			res.leng = 1;
+			return res;
+		}
+		else {
+			int j = 0;
+			res.S = new char[y - x];
+			for (int i = x;i <= y;i++) {
+				res.S[j] = S[i];
+				j++;
+			}
+			res.leng = j;
+			return res;
+		}
+	}
+	String operator *(int x) {
+		String res;
+		int m = 0;
+		int k = 0;
+		res.S = new char[leng * x];
+		res.leng = leng;
+		res.S[(leng * x) - 1] = '\0';
+		int i = 0;
+		while (i < x) {
+			if (k == leng) {
+				k = 0;
+			}
+			for (int j = m;j < res.leng; j++) {
+				res.S[j] = this->S[k];
+				k++;
+			}
+			m += leng;
+			res.leng += leng;
+			i++;
+		}
+		res.leng = res.leng - leng;
+
+		return res;
+	}
+
+	char operator[](int x) {
+		if (x >= leng) {
+			cout << "owibka indeksa";
+		}
+		char res;
+		res = S[x];
+		return res;
+	}
+	//String operator=(String s) {
+	//	//if (this->S != nullptr) {
+	//	//	delete[] S;
+	//	//}
+	//	leng = s.leng;
+	//	this->S = s.S;
+	//	this->S[leng] = '\0';
+	//	return *this;
+	//}
+	String& operator=(const String& s1) {
+		if (this == &s1)
+			return *this;
+		leng = s1.leng;
+		this->S = s1.S;
+		this->S[leng] = '\0';
+		return *this;
+	}
+	String operator - (String& s) {
+		String res(*this);
+		int c = findd(this->S, s.S);
+		//int m = count(this->S, s.S);
+		for (int i = 0; i < c; i++) {
+			char* where = strstr(res.S, s.S);
+			if (where)
+			{
+				memmove(where, where + strlen(s.S),
+					strlen(where + strlen(s.S)) + 1);
+				res.leng = strlen(res.S);
+			}
+		}
+
+		return res;
+	}
+	int kolvo(String s2) {
+		int b = findd(this->S, s2.S);
+		return b;
+	}
+	int findre(String s2) {
+		int b = 0;
+		int n = strlen(this->S);
+		int m = strlen(s2.S);
+		int d = 0;
+		int z = d;
+		for (int i = 0; i < n; i++) {
+			if (this->S[i] == s2.S[0]) {
+
+				for (int k = 0; k < m; k++) {
+					if (this->S[i + k] == s2.S[k]) {
+						d++;
+						if (d == m) { return i; };
+						continue;
+
+					}
+					else {
+						d = 0;;
+						break;
+					}
+					//tmp[i + k] = tmp[i + k + 1];
+				}
+
+			}
+		}
+		return z;
+	}
+	String zamena(String s1, String s2, int q) {
+		String res;
+		int j = 0;
+		int p = 0;
+		res.S = new char[strlen(this->S) - strlen(s1.S) + strlen(s2.S)];
+		res.leng = leng - s1.leng + s2.leng;
+		res.S[res.leng] = '\0';
+		for (int i = 0; i < leng; i++) {
+			if (i == q) {
+				for (int n = i; n < i + s2.leng; n++) {
+					res.S[n] = s2.S[j];
+					j++;
+					p++;
+				}
+				i = i + s1.leng;
+				j = 0;
+			}
+
+			res.S[p] = this->S[i];
+			p++;
+		}
+		return res;
+	}
+};
+
+//String del_rep(String rep, String del) { //меняем удаляем исходная
+//	String res(*this);
+//	int c = find(this->S, del.S);
+//	//int m = count(this->S, s.S);
+//	for (int i = 0; i < c; i++) {
+//		char* where = strstr(res.S, del.S);
+//		if (where)
+//		{
+//				memmove(where, where + strlen(del.S),
+//					strlen(where + strlen(del.S)) + 1);
+
+//			res.leng = strlen(res.S)+strlen(rep.S);
+//		}
+//	}
+
+//	return res;
+//}
+
+
+
+int main() {
+	ifstream file;
+	file.open("input.txt");
+	//char c;
+	String str1;
+	String str2;
+	String str3;
+	char c = '\n'; // force entry into loop
+	while (c != EOF) {
+		int i = 0;
+		while ((c = getchar()) != EOF && c != '\n') {
+			str1 += c; // should really check for buffer overflow here.
+			i++;
+		}
+		while ((c = getchar()) != EOF && c != '\n') {
+			str2 += c; // should really check for buffer overflow here.
+			i++;
+		}
+		while ((c = getchar()) != EOF && c != '\n') {
+			str3 += c; // should really check for buffer overflow here.
+			i++;
+		}
+	}
+	int m = 0;
+	int b = str1.kolvo(str2);
+	String str4;
+	while (b != 0) {
+		m = str1.findre(str2);
+		str4 = str1.zamena(str2, str3, m);
+		b--;
+		str1 = str4;
+	}
+	str4.print();
+	//int m;
+	/*str1.printts();
+	str2.prints();*/
+	//String str3()
+	//m = str2.lenght(str2);
+	//cout << m;
+	/*str1.print();
+	cout << '\n';
+	str2.print();
+	cout << "\n";
+	str3.print();*/
+	/*str1.find(str2, str3);
+	str1.print();*/
+
+
+	return 0;
+
+}
