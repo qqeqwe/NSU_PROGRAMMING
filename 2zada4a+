@@ -138,7 +138,7 @@ class Mul : public Oper {
 public:
 	Mul(Expression* e1, Expression* e2) : Oper(e1, e2, '*') {};
 	Expression* diff() {
-		return new Add(new Mul(exp1->diff(), exp2), new Mul(exp1, exp2->diff()));
+		return new Add(new Mul(exp1->diff(), exp2->copy()), new Mul(exp1->copy(), exp2->diff()));
 	}
 	Expression* copy() {
 		return new Mul(exp1->copy(), exp2->copy());
@@ -157,7 +157,7 @@ class Div : public Oper {
 public:
 	Div(Expression* e1, Expression* e2) : Oper(e1, e2, '/') {};
 	Expression* diff() {
-		return new Div(new Sub(new Mul(exp1->diff(), exp2), new Mul(exp1, exp2->diff())), new Mul(exp2, exp2));
+		return new Div(new Sub(new Mul(exp1->diff(), exp2->copy()), new Mul(exp1->copy(), exp2->diff())), new Mul(exp2->copy(), exp2->copy()));
 	}
 	Expression* copy() {
 		return new Div(exp1->copy(), exp2->copy());
@@ -267,6 +267,6 @@ int main()
 	de->print();
 	system("pause");
 	delete e;
-	//delete de;
+	delete de;
 	return 0;
 }
