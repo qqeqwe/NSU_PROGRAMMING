@@ -1,0 +1,272 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+using namespace std;
+class Expression
+{
+public:
+	virtual void print() = 0;
+	virtual Expression* diff() = 0;
+	virtual int eval(const string& varVal) = 0;
+	virtual Expression* copy() = 0;
+	virtual ~Expression() {};
+};
+class Oper : public Expression
+{
+protected:
+	Expression* exp1;
+	Expression* exp2;
+	char sign;
+public:
+	void print() {
+		cout << '(';
+		exp1->print();
+		cout << sign;
+		exp2->print();
+		cout << ')';
+	}
+	virtual ~Oper() { delete exp1; delete exp2;};
+	Oper(Expression* exp1, Expression* exp2, char sign) : exp1(exp1), exp2(exp2), sign(sign) {}
+};
+class Number : public Expression {
+protected:
+	int number;
+public:
+	Number() : number(0) {}
+	virtual Expression* copy() {
+		return new Number(number);
+	}
+	Number(int number) :number(number) {}
+	void print() {
+		cout << number;
+	}
+	Expression* diff() {
+		return new Number(0);
+	}
+	int eval(const string& varVal) {
+		return number;
+	}
+};
+
+class Variable : public Expression {
+protected: string var;
+public:
+	Variable(string var) : var(var) {}
+	void print() {
+		cout << var;
+	}
+	virtual Expression* copy() {
+		return new Variable(var);
+	}
+	Expression* diff() {
+		return new Number(1);
+	}
+	int eval(const string& varVal) {
+		/*for (int i = 0; i < varVal.size(); i++){*/
+			/*if (varVal[i] == var[0]) {
+				int j = 0;
+				for (; j < var.size(); j++)
+					if (varVal[i + j] != var[j])
+						break;ggg
+				if (j == var.size()) {*/
+		int i = 0;
+		while (i < varVal.size()) {
+			int j = 0;
+			j = varVal.find(var);
+			int k = 0;
+			int res = 0;
+			while (varVal[j + k] != '\0' || varVal[j + k] != ';') {
+				res *= 10;
+				res += varVal[j + k] - '0';
+				k++;
+			}
+			return res;
+		}
+		return 0;
+	}
+};
+
+class Add : public Oper {
+//protected:
+	//Expression* exp1, * exp2;
+public:
+	Add(Expression* e1, Expression* e2) : Oper(e1, e2, '+') {};//exp1(e1), exp2(e2) {}
+	Expression* diff() {
+		return new Add(exp1->diff(), exp2->diff());
+	}
+	Expression* copy() {
+		return new Add(exp1->copy(), exp2->copy());
+	}
+	/*void print() {
+		cout << "("; exp1->print(); cout << "+"; exp2->print(); cout << ")";
+	}*/
+	int eval(const string& varVal) {
+		return exp1->eval(varVal) + exp2->eval(varVal);
+	}
+	//~Add() {
+	//	delete exp1;
+	//	delete exp2;
+	//}
+};
+
+class Sub : public Oper {
+//protected:
+//	Expression* exp1, * exp2;
+public:
+	Expression* copy() {
+		return new Sub(exp1->copy(), exp2->copy());
+	}
+	Sub(Expression* e1, Expression* e2) : Oper(e1, e2, '-') {};
+	Expression* diff() {
+		return new Sub(exp1->diff(), exp2->diff());
+	}
+	/*void print() {
+		cout << "("; exp1->print(); cout << "-"; exp2->print(); cout << ")";
+	}*/
+	int eval(const string& var) {
+		return exp1->eval(var) - exp2->eval(var);
+	}
+	/*~Sub() {
+		delete exp1;
+		delete exp2;
+	}*/
+};
+
+class Mul : public Oper {
+//protected:
+//	Expression* exp1, * exp2;
+public:
+	Mul(Expression* e1, Expression* e2) : Oper(e1, e2, '*') {};
+	Expression* diff() {
+		return new Add(new Mul(exp1->diff(), exp2), new Mul(exp1, exp2->diff()));
+	}
+	Expression* copy() {
+		return new Mul(exp1->copy(), exp2->copy());
+	}
+	//void print() {
+	//	cout << "("; exp1->print(); cout << "*"; exp2->print(); cout << ")";
+	//}
+	int eval(const string& varVal) {
+		return exp1->eval(varVal) * exp2->eval(varVal);
+	}
+};
+
+class Div : public Oper {
+//protected:
+//	Expression* exp1, * exp2;
+public:
+	Div(Expression* e1, Expression* e2) : Oper(e1, e2, '/') {};
+	Expression* diff() {
+		return new Div(new Sub(new Mul(exp1->diff(), exp2), new Mul(exp1, exp2->diff())), new Mul(exp2, exp2));
+	}
+	Expression* copy() {
+		return new Div(exp1->copy(), exp2->copy());
+	}
+	//void print() {
+	//	cout << "("; exp1->print(); cout << "/"; exp2->print(); cout << ")";
+	//}
+	int eval(const string& varVal) {
+		return exp1->eval(varVal) / exp2->eval(varVal);
+	}
+	//~Div() {
+	//	delete exp1;
+	//	delete exp2;
+	//}
+};
+
+Expression* read_expression(string a) {
+	Expression* e;
+	e = new Number(0);
+	if (a[0] != '(') {
+		if (isdigit(a[0])) {
+			int n = 0;
+			int i = 0;
+			while (i < a.length()) {
+				n *= 10;
+				n += (int)(a[i] - '0');
+				i++;
+			}
+			e = new Number(n);
+		}
+		else {
+			e = new Variable(a);
+		}
+	}
+	else {//expression in brackets
+		int bc = 1;
+		int i = 1;
+		if (a[1] == '(') {
+			bc++;
+			while (bc > 1) {
+				i++;
+				if (a[i] == '(') {
+					bc++;
+				}
+				if (a[i] == ')') {
+					bc--;
+				}
+			}
+			i++;
+		}
+		else {
+			while ((a[i] != '+') && (a[i] != '-') && (a[i] != '*') && a[i] != '/')
+				i++;
+		}
+
+		int j = 1;
+		bc = 0;
+		if (a[i + j] == '(') {
+			bc++;
+			while (bc > 0) {
+				j++;
+				if (a[i + j] == '(') {
+					bc++;
+				}
+				if (a[i + j] == ')') {
+					bc--;
+				}
+			}
+		}
+		else {
+			while (a[i + j] != ')')
+				j++;
+			j--;
+		}
+		string b(a, 1, i - 1);
+		string c(a, i + 1, j);
+		Expression* eb = read_expression(b);
+		Expression* ec = read_expression(c);
+		switch (a[i]) {
+		case '+':
+			e = new Add(eb, ec);
+			break;
+		case '-':
+			e = new Sub(eb, ec);
+			break;
+		case '*':
+			e = new Mul(eb, ec);
+			break;
+		case '/':
+			e = new Div(eb, ec);
+			break;
+		default:
+			e = new Number(0);
+			break;
+		}
+	}
+	return e;
+}
+int main()
+{
+	string s;
+	cin >> s;
+	Expression* e = read_expression(s);
+	Expression* de = e->diff();
+	//e->print();
+	//cout << endl;
+	de->print();
+	system("pause");
+	//delete e;
+	//delete de;
+	return 0;
+}
