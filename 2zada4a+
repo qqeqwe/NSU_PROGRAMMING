@@ -266,7 +266,7 @@ int main()
 	//cout << endl;
 	de->print();
 	system("pause");
-	//delete e;
+	delete e;
 	//delete de;
 	return 0;
 }
