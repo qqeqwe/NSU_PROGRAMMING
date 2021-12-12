@@ -1,0 +1,250 @@
+// rwqw.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include <iostream>
+#include <set>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <list>
+
+using namespace std;
+ifstream f_in("input.txt");
+ofstream f_out("output.txt");
+
+class AVTOMAT {
+private:
+    int amount,
+        startcondition,
+        amountmove;
+    //needtolook;
+    //set<int>endnums;
+    set<int> endnums;
+    vector<vector<char>>matrix;
+
+public:
+    void detect(char* exp) {
+        int condition = startcondition;
+        // int b = 0;
+        int m = 0;
+        int q = 0;
+        //char u;
+        while (exp[m] != '\0')
+        {
+            m++;
+        }
+        for (int i = 0; i < amountmove; i++) {
+            int  j = 2;
+            if (matrix[i][j] == exp[q] && condition == (matrix[i][0] - '0')) {
+                /* u = matrix[i][j];
+                 u = matrix[i][0];
+                 u = matrix[i][1];*/
+                condition = matrix[i][1] - '0';
+                q++;
+            }
+
+        }
+        for (const auto& i : endnums) {
+            if (condition == i) {
+                cout << "YES \n";
+                return;
+            }
+            else {
+                cout << "NO \n";
+                return;
+            }
+        }
+    }
+           
+
+        /* AVTOMAT()
+         {
+             amount = 0;
+             startcondition = 0;
+             amountend = 0;
+             amountmove = 0;
+             endnums = nullptr;
+             matrix = v.();
+         }*/
+    AVTOMAT(int x, int y, int v, set<int> &c, vector<vector<char>>m) {
+        this->amount = x;
+        this->startcondition = y;
+       
+        this->amountmove = v;
+        //this->needtolook = u;
+        this->endnums = c;
+        this->matrix = m;
+    }
+    // функция ( алфавит, чаров ; списываем все разные символы insert; смотрим по афавиту  все варианты; 
+    AVTOMAT& determinate()
+    {
+        set<char> alphabet;
+        char n;
+        set<set<char>> new_endn, new_move;
+        n = startcondition + '0';
+        vector<vector<set<char>>>mega_matrix;
+        for (int i = 0; i < this->amountmove; i++) {
+            int j = 2;
+            auto l = this->matrix[i][j];
+            alphabet.insert(l);
+        
+        }
+        list<set<char>> sets;
+        sets.push_front(set <char>{n});
+        new_move.insert(set <char>{n});
+
+        while (!sets.empty()) {
+            set<char> z(sets.front());
+            sets.pop_front();
+           
+            for (const auto& i : alphabet) {
+                set<char> cur;
+                set<char> k{i};
+                for (const auto& j : z) {
+                    for (int m = 0; m < amountmove; m++) {
+                        if (i == matrix[m][2] && j == matrix[m][0]) {
+                            cur.insert(matrix[m][1]);
+                        }
+                    }
+                }
+
+                if (!cur.empty()) {
+                    mega_matrix.push_back(vector < set<char>> {z, cur, k});
+                }
+                bool is_endn = false;
+                for (const auto& l : endnums) {
+                    for (const auto& g : cur) {
+                        int g1 = g - '0';
+                        if (l == g1) {
+                            new_endn.insert(cur);
+                            is_endn = true;
+                            break;
+                        }
+                        
+                    }
+                    if (is_endn) { break; }
+                }
+                bool is_v_tyse = false;
+                for (const auto& b : new_move) {
+                    if (cur == b) {
+                        is_v_tyse = true;
+                        break;
+                    }
+                }
+                if (!is_v_tyse) {
+                    new_move.insert(cur);
+                    sets.push_back(cur);
+                }
+            }
+
+        }
+        int new_amount = new_move.size();
+        int new_amountmove = mega_matrix.size();
+        int new_startcondition = startcondition;
+        set<int> new_end;
+        for (const auto& p : new_endn) {
+            if (p == set<char>{n}) {
+                new_end.insert(startcondition);
+            }
+        }
+        new_endn.erase(set<char>{n});
+        new_move.erase(set<char>{n});
+        vector<vector<char>> new_matrix;
+        int count = 0;
+        if (startcondition == 0) {
+            count = 1;
+        }
+        for (auto i = new_move.begin();i != new_move.end(); i++) {
+            for (auto& j : mega_matrix) {
+                char m = count + '0';
+                if (j[0] == *i) {
+                    j[0] = set<char>{ m };
+                }
+                if (j[1] == *i) {
+                    j[1] = set<char>{ m };
+                }
+            }
+            for (auto& s : new_endn) {
+                if (s == *i) {
+                    new_end.insert(count);
+                }  
+            }
+            count++;
+        }
+        for (auto i : mega_matrix) {
+            auto j0 = i[0].begin();
+            auto j1 = i[1].begin();
+            auto j2 = i[2].begin();
+            new_matrix.push_back(vector<char>{*j0, * j1, * j2});
+        }
+
+        *this = AVTOMAT(new_amount, startcondition, new_amountmove, new_end, new_matrix);
+        return *this;
+    }
+
+};
+char* get_string(int* len) {
+    *len = 0; // изначально строка пуста
+    int capacity = 1; // ёмкость контейнера динамической строки (1, так как точно будет '\0')
+    char* s = (char*)malloc(sizeof(char)); // динамическая пустая строка
+
+    char c = getchar(); // символ для чтения данных
+
+    // читаем символы, пока не получим символ переноса строки (\n)
+    while (c != '\n') {
+        s[(*len)++] = c; // заносим в строку новый символ
+
+        // если реальный размер больше размера контейнера, то увеличим его размер
+        if (*len >= capacity) {
+            capacity *= 2; // увеличиваем ёмкость строки в два раза
+            s = (char*)realloc(s, capacity * sizeof(char)); // создаём новую строку с увеличенной ёмкостью  
+        }
+
+        c = getchar(); // считываем следующий символ          
+    }
+
+   s[*len] = '\0'; // завершаем строку символом конца строки
+
+    return s; // возвращаем указатель на считанную строку
+}
+
+int main()
+{
+    int amount1, startcondition1, amountend1, amountmove1, stramount, leng;
+    int l = 3;
+    cin >> amount1;
+    cin >> startcondition1;
+    cin >> amountend1;
+    set<int> endnums1;
+    int endn;
+    for (int i = 0; i < amountend1; i++) {
+        cin >> endn;
+        endnums1.insert(endn);
+    }
+    cin >> amountmove1;
+
+    vector < vector <char> > a(amountmove1, vector <char>(l)); // Объявление вектора на n строк по m элементов 
+
+    for (int i = 0; i < amountmove1; i++)     // Цикл, который идёт по строкам
+        for (int j = 0; j < l; j++) // Цикл, который идёт по элементам
+        {
+           // cout << "[" << i << "]" << "[" << j << "]";
+            cin >> a[i][j]; // Заполнение вектора или массива (в данном случае ввод)
+        }
+    AVTOMAT b1(amount1, startcondition1, amountmove1, endnums1, a);
+    b1.determinate();
+    cin >> stramount;
+    for (int i = 0; i < stramount+1; i++) {
+        char* s = get_string(&leng);
+        if (i != 0) {
+            b1.detect(s);
+        }
+        delete[] s;
+        leng = 0;
+    }
+    f_in.close();
+    f_out.close();
+
+
+}
+
