@@ -1,0 +1,133 @@
+#include <fstream>
+#include <ctime>
+#include <algorithm>
+#include <iostream>
+#include <thread>
+#include <chrono>
+#include <queue>
+#include <mutex>
+#include <atomic>
+#include <string>
+// КАЖДОГО ПОТОКА СВОЙ СТЕК ВЫЗОВОВ. ЛОКАЛЬНЫЕ ПЕРМЕННЫЕ. ФРЕЙМЫ!!! 
+// ГОЛБАЛЬНЫЕ ОБЩИЕ thread_local создает для всех!! !
+#define NUMofThreads 2
+
+using namespace std;
+mutex tex;
+string Output = R"(E:\zxccxz\output\)";
+string Input;
+string A = R"(E:\her\)";
+
+condition_variable storageMutexCondVar;
+vector<string> allURLs;
+queue<string> URLqueue;
+atomic<bool> flag;
+int newone = 0;
+
+
+void URLfinder() {
+
+    while (true) {
+        unique_lock<mutex> dver(tex); // закрыли мьютекс 
+        storageMutexCondVar.wait(dver, []() -> bool { return !URLqueue.empty() || flag.load(); });
+        if (URLqueue.empty())
+            break;
+        string URL = URLqueue.front();
+        newone++;
+        URLqueue.pop();
+
+        dver.unlock();
+
+        string str;
+        ifstream input(A + URL);
+        getline(input, str);
+        input.close();
+        size_t na4alo = 0;
+        while (na4alo != string::npos) { //пока не не может найти 
+            na4alo = str.find("<a href=", na4alo);
+            if (na4alo != string::npos) { //esli nashlo
+                na4alo = str.find("://", na4alo);
+                size_t konec = str.find(">", na4alo) - na4alo - 4;
+                URL = str.substr(na4alo + 3, konec);
+                na4alo += konec;
+                dver.lock();//123123
+                if (::std::find(allURLs.begin(), allURLs.end(), URL) == allURLs.end()) { //esli posledH99
+                    allURLs.push_back(URL);
+                    dver.unlock();
+
+                    ofstream output(Output + URL);
+                    ifstream input(A + URL);
+                    
+                    string x;
+                    getline(input, x);
+                    input.close();
+                    output << x;
+                    output.close();
+                    dver.lock();
+                    URLqueue.push(URL);
+                    
+                                       dver.unlock();
+                                       storageMutexCondVar.notify_all();
+                }
+                else dver.unlock();
+            }
+            else break;
+        }
+    }
+
+}
+
+
+
+int main()
+{
+    clock_t time1 = clock(); //начали засекать! 
+   ifstream vhod(A + "0.html"); // poteklo
+   string str1;
+   string str2;
+//
+   vhod >> str2;
+  vhod >> Input;
+//
+   ifstream vhod2(Input + str2);
+  getline(vhod2, str1);
+  vhod2.close();
+   allURLs.emplace_back("0.html");
+   ofstream fout(Output + str2);
+   fout << str1;
+   fout.close();
+   allURLs.push_back(str2);
+    vector<thread> PotKu;
+
+    URLqueue.push("0.html");
+    flag.store(false);
+    PotKu.reserve(NUMofThreads); //pam9t' rezerviM
+
+    for (int i = 0; i < NUMofThreads; i++)
+        PotKu.emplace_back(thread(URLfinder));
+    storageMutexCondVar.notify_one();
+    while (true) { 
+       tex.lock();
+        if (!URLqueue.empty()) {
+            tex.unlock();
+            break;
+        }
+        else {
+            tex.unlock();
+            this_thread::sleep_for(chrono::milliseconds(1));
+        }
+    }
+    flag.store(true);
+    for (int i = 0; i < NUMofThreads; i++) {
+        storageMutexCondVar.notify_one();
+    }
+  
+   for (int i = 0; i < NUMofThreads; i++)
+        PotKu[i].join();
+  
+
+    clock_t time2 = clock(); //закончили зачекать
+    cout << "Potratili vremeni: " << (time2 - time1) / 1000.00 << "\n YnikymoB = "
+        << newone;
+
+}
